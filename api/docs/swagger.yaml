@@ -1,0 +1,106 @@
+definitions:
+  biometry-hack-2024-api_internal_models.AudioAnalyzeResponse:
+    properties:
+      message:
+        type: string
+      ok:
+        type: boolean
+    type: object
+  biometry-hack-2024-api_internal_models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  biometry-hack-2024-api_internal_models.PhotoAnalyzeResponse:
+    properties:
+      message:
+        type: string
+      ok:
+        type: boolean
+    type: object
+info:
+  contact: {}
+paths:
+  /face:
+    post:
+      consumes:
+      - image/jpeg
+      description: Создает биометрический профиль на основе фотографии
+      parameters:
+      - description: Фотография лица в формате JPEG
+        format: binary
+        in: body
+        name: file
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешное создание профиля
+          schema:
+            $ref: '#/definitions/biometry-hack-2024-api_internal_models.PhotoAnalyzeResponse'
+        "400":
+          description: Ошибка чтения тела запроса
+          schema:
+            $ref: '#/definitions/biometry-hack-2024-api_internal_models.ErrorResponse'
+        "413":
+          description: Размер фотографии превышает 1МБ
+        "415":
+          description: Неправильный тип контента (не image/jpeg)
+          schema:
+            $ref: '#/definitions/biometry-hack-2024-api_internal_models.ErrorResponse'
+        "422":
+          description: Фотография не удовлетворяет требованиям
+          schema:
+            $ref: '#/definitions/biometry-hack-2024-api_internal_models.PhotoAnalyzeResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/biometry-hack-2024-api_internal_models.ErrorResponse'
+      summary: Создание лицевой биометрии
+      tags:
+      - FaceBiometry
+  /voice:
+    post:
+      consumes:
+      - audio/*
+      description: Создает биометрический профиль на основе голоса
+      parameters:
+      - description: Аудиофайл с голосом
+        format: binary
+        in: body
+        name: file
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешное создание профиля
+          schema:
+            $ref: '#/definitions/biometry-hack-2024-api_internal_models.AudioAnalyzeResponse'
+        "400":
+          description: Ошибка чтения тела запроса
+          schema:
+            $ref: '#/definitions/biometry-hack-2024-api_internal_models.ErrorResponse'
+        "413":
+          description: Размер аудио превышает 1МБ
+        "415":
+          description: Неправильный тип контента (не аудио)
+          schema:
+            $ref: '#/definitions/biometry-hack-2024-api_internal_models.ErrorResponse'
+        "422":
+          description: Аудио не удовлетворяет требованиям
+          schema:
+            $ref: '#/definitions/biometry-hack-2024-api_internal_models.AudioAnalyzeResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/biometry-hack-2024-api_internal_models.ErrorResponse'
+      summary: Создание голосовой биометрии
+      tags:
+      - VoiceBiometry
+swagger: "2.0"

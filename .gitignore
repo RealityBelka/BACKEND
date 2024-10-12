@@ -1,0 +1,2 @@
+# ignore root level dotenv
+.env

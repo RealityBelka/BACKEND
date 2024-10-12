@@ -1,0 +1,8 @@
+# ignore 
+.idea
+
+# ingore local .env
+.env 
+
+# ignore byte-code builds cache
+__pycache__
