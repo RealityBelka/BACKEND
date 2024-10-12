@@ -73,8 +73,6 @@ func (b biometryRepository) CreateFaceBiometry(ctx context.Context, filename str
 		return err
 	}
 
-	fmt.Println("photo len:", len(photo))
-
 	query := `
 	INSERT INTO face_biometry (filename, photo) VALUES ($1, $2)
 	`

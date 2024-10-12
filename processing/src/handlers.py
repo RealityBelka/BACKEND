@@ -12,9 +12,8 @@ async def process_photo(msg):
 
     pr = json.dumps(result).encode()
 
-    print(len(pr))
-
     await nats_client.get_nc().publish(msg.reply, pr)
+    await nats_client.get_nc().flush()
 
 
 async def process_audio(msg):
@@ -24,9 +23,5 @@ async def process_audio(msg):
 
     pr = json.dumps(result).encode()
 
-    print(len(pr))
-
-    print("сообщение отправляется")
     await nats_client.get_nc().publish(msg.reply, pr)
-    print("сообщение отправлено")
     await nats_client.get_nc().flush()
