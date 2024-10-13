@@ -39,7 +39,7 @@ async def analyze_photo(photo, numbers: List[int]) -> dict[str, Union[bool, List
 
     '''4'''
     head_pose = await face_analyzer.get_head_pose(img_rgb)
-    if not (160 <= head_pose["yaw"] <= 200 and 100 <= head_pose["pitch"] <= 140 and -20 <= head_pose["roll"] <= 20):
+    if not ((140 <= head_pose["yaw"] <= 220) and (80 <= head_pose["pitch"] <= 180) and (-40 <= head_pose["roll"] <= 40)):
         return {"ok": flag, "message": "Держите голову прямо"}
 
     '''5'''
