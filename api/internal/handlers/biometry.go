@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"biometry-hack-2024-api/internal/convertors"
 	"biometry-hack-2024-api/internal/models"
 	"biometry-hack-2024-api/internal/service"
+	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,11 +13,10 @@ import (
 
 const (
 	DefaultPhotoExtension = "jpeg"
-	DefaultAudioExtension = "aac"
+	DefaultAudioExtension = "ogg"
 	Megabyte              = 1024 * 1024 // Megabyte = 1024 Kilobytes = 1024 * 1024 bytes
 
-	ExpectedPhotoHeader = "image/jpeg"
-	ExpectedAudioHeader = "audio/aac"
+	ContentTypeFormData = "multipart/form-data"
 )
 
 func NewErrorResponse(err string) models.ErrorResponse {
@@ -48,27 +50,54 @@ func NewBiometryHandlers(service service.BiometryService) BiometryHandlers {
 // @Failure      500    {object}  models.ErrorResponse         "Внутренняя ошибка сервера"
 // @Router       /face [post]
 func (h biometryHandlers) CreateFaceBiometry(c *gin.Context) {
-	if c.ContentType() != ExpectedPhotoHeader {
+	if c.ContentType() != ContentTypeFormData {
 		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
-			Error: "request content type is not image/jpeg",
+			Error: fmt.Sprintf("content type must be '%s'", ContentTypeFormData),
 		})
 		return
 	}
 
-	photo, err := c.GetRawData()
+	rawPhoto, err := c.FormFile("photo")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
 	}
 
-	if len(photo) > Megabyte {
+	if rawPhoto.Size > Megabyte {
 		c.AbortWithStatus(http.StatusRequestEntityTooLarge)
 		return
 	}
 
-	response, err := h.service.CreateFaceBiometry(c.Request.Context(), photo, DefaultPhotoExtension)
+	photoFile, err := rawPhoto.Open()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
+			Error: err.Error(),
+		})
+		return
+	}
+	defer photoFile.Close()
+
+	photo, err := io.ReadAll(photoFile)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
+			Error: err.Error(),
+		})
+		return
+	}
+
+	rawBorder := c.PostForm("numbers")
+
+	border, err := convertors.FromStringToIntSlice(string(rawBorder))
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
+			Error: err.Error(),
+		})
+		return
+	}
+
+	response, err := h.service.CreateFaceBiometry(c.Request.Context(), photo, border, DefaultPhotoExtension)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error: err.Error(),
@@ -99,28 +128,55 @@ func (h biometryHandlers) CreateFaceBiometry(c *gin.Context) {
 // @Failure      500    {object}  models.ErrorResponse         "Внутренняя ошибка сервера"
 // @Router       /voice [post]
 func (h biometryHandlers) CreateVoiceBiometry(c *gin.Context) {
-	if c.ContentType() != ExpectedAudioHeader {
-
+	if c.ContentType() != ContentTypeFormData {
 		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
-			Error: "content type must be any correct MIME audio type",
+			Error: fmt.Sprintf("content type must be '%s'", ContentTypeFormData),
 		})
 		return
 	}
 
-	audio, err := c.GetRawData()
+	rawAudio, err := c.FormFile("audio")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+		fmt.Println("no file with name 'audio'")
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
 	}
 
-	if len(audio) > Megabyte {
+	if rawAudio.Size > Megabyte {
 		c.AbortWithStatus(http.StatusRequestEntityTooLarge)
 		return
 	}
 
-	response, err := h.service.CreateVoiceBiometry(c.Request.Context(), audio, DefaultAudioExtension)
+	audioFile, err := rawAudio.Open()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
+			Error: err.Error(),
+		})
+		return
+	}
+	defer audioFile.Close()
+
+	audio, err := io.ReadAll(audioFile)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
+			Error: err.Error(),
+		})
+		return
+	}
+
+	rawDigits := c.PostForm("numbers")
+
+	digits, err := convertors.FromStringToIntSlice(string(rawDigits))
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
+			Error: err.Error(),
+		})
+		return
+	}
+
+	response, err := h.service.CreateVoiceBiometry(c.Request.Context(), audio, digits, DefaultAudioExtension)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error: err.Error(),

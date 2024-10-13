@@ -6,6 +6,13 @@ type AudioAnalyzeResponse struct {
 	Message string `json:"message"`
 }
 
+// swagger:model AudioAnalyzeResponseDigits
+type AudioAnalyzeResponseDigits struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Digits  []int  `json:"digits"`
+}
+
 // swagger:model PhotoAnalyzeResponse
 type PhotoAnalyzeResponse struct {
 	Ok      bool   `json:"ok"`

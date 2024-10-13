@@ -4,8 +4,12 @@ WORKDIR /app
 
 # Установка системных библиотек, необходимых для работы OpenCV
 RUN apt-get update && apt-get install -y \
+    gcc \
+    ffmpeg \
     libgl1-mesa-glx \
-    libglib2.0-0
+    libglib2.0-0 \
+    build-essential \
+    python3-dev
 
 COPY requirements.txt .
 

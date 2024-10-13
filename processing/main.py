@@ -23,9 +23,9 @@ async def main():
         await stop_event.wait()
 
     finally:
-        print("закрытие соединения...")
+        print("draining nats connection...")
         await nats_client.close_connection()
-        print("соединение закрыто")
+        print("connection drained")
 
 
 if __name__ == "__main__":

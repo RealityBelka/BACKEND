@@ -1,61 +1,61 @@
-  version: '3.9'
+version: '3.9'
 
 
-  services:
-    api:
-      container_name: biometry_api
-      build:
-        context: ./api
-        dockerfile: ./build/app.Dockerfile
-      depends_on:
-        db:
-          condition: service_healthy
-      ports:
-        - "8080:8080"
+services:
+  api:
+    container_name: biometry_api
+    build:
+      context: ./api
+      dockerfile: ./build/app.Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
 
-    db:
-      container_name: biometry_db
-      build: 
-        context: ./api
-        dockerfile: ./build/db.Dockerfile
-      environment:
-        - POSTGRES_PORT=${DB_PORT}
-        - POSTGRES_USER=${DB_USER}
-        - POSTGRES_PASSWORD=${DB_PASSWORD}
-        - POSTGRES_DB=${DB_NAME}
-      healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-        interval: 10s
-        timeout: 5s
-        retries: 5
-      ports:
-        - "${DB_PORT}:5432"
-      volumes:
-        - pgdata:/var/lib/postgresql/data
+  db:
+    container_name: biometry_db
+    build: 
+      context: ./api
+      dockerfile: ./build/db.Dockerfile
+    environment:
+      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
-    processing:
-      container_name: biometry_ml
-      build:
-        context: ./processing
-        dockerfile: ./Dockerfile
-      depends_on:
-        db:
-          condition: service_healthy
+  processing:
+    container_name: biometry_ml
+    build:
+      context: ./processing
+      dockerfile: ./Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
 
-    nats:
-      container_name: biometry_broker
-      command: -m 8222
-      image: nats
-      environment:
-        - NATS_PORT=${NATS_PORT}
-      ports:
-        - "${NATS_PORT}:4222"
-        - "6222:6222"
-        - "8222:8222"
-      depends_on:
-        db:
-          condition: service_healthy
+  nats:
+    container_name: biometry_broker
+    command: -m 8222
+    image: nats
+    environment:
+      - NATS_PORT=${NATS_PORT}
+    ports:
+      - "${NATS_PORT}:4222"
+      - "6222:6222"
+      - "8222:8222"
+    depends_on:
+      db:
+        condition: service_healthy
 
 
-  volumes:
-    pgdata:
+volumes:
+  pgdata:

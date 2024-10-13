@@ -6,10 +6,16 @@ TODO
 
 Перед запуском приложения создайте файл `.env` и скопируйте в него содержимое файла `.example.env`. Заполните `.env` файл в соответствии с вашей конфигурацией. Аналогичное проделайте в директориях [processing/](processing/) и [api/cfgs/](api/cfgs/)
 
+Склонируйте репозиторий в удобной для вас директории:
+
+```sh
+git clone https://github.com/RealityBelka/BACKEND.git
+```
+
 Для запуска выполните следующую команду:
 
 ```sh
-docker-compose build
+docker compose up --build
 ```
 
 # TODO 

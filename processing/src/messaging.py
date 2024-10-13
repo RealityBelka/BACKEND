@@ -14,7 +14,7 @@ class NatsClient:
             url=f"nats://{config.nats_host}:{config.nats_port}",
             max_pending_size=1024*1024,
     ):
-        print(config.nats_host, config.nats_port)
+        print(f"connecting to nats://{config.nats_host}:{config.nats_port}...")
         await self.nc.connect(url)
 
         self.nc._max_pending_size = max_pending_size

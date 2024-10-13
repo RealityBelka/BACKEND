@@ -1,6 +1,7 @@
 package service
 
 import (
+	"biometry-hack-2024-api/internal/convertors"
 	"biometry-hack-2024-api/internal/models"
 	"biometry-hack-2024-api/internal/repository"
 	"biometry-hack-2024-api/pkg/messaging"
@@ -15,8 +16,10 @@ import (
 )
 
 const (
-	photoExt       = "jpeg"
-	requestTimeout = time.Duration(2 * time.Second)
+	photoExt = "jpeg"
+
+	photoRequestTimeout = time.Duration(2 * time.Second)
+	voiceRequestTimeout = time.Duration(10 * time.Second)
 )
 
 type biometryService struct {
@@ -33,8 +36,13 @@ func NewBiometryService(repo repository.BiometryRepository, nc *nats.Conn, log *
 	}
 }
 
-func (s biometryService) CreateVoiceBiometry(ctx context.Context, audio []byte, ext string) (models.AudioAnalyzeResponse, error) {
-	reply, err := s.nc.Request(messaging.SubjectAudio, audio, requestTimeout)
+func (s biometryService) CreateVoiceBiometry(ctx context.Context, audio []byte, digits []int, ext string) (models.AudioAnalyzeResponse, error) {
+	bytes, err := convertors.FromBinNumbersPairToBinary(audio, digits)
+	if err != nil {
+		return models.AudioAnalyzeResponse{}, err
+	}
+
+	reply, err := s.nc.Request(messaging.SubjectAudio, bytes, voiceRequestTimeout)
 	if err != nil {
 		return models.AudioAnalyzeResponse{}, err
 	}
@@ -57,8 +65,13 @@ func (s biometryService) CreateVoiceBiometry(ctx context.Context, audio []byte, 
 	return response, nil
 }
 
-func (s biometryService) CreateFaceBiometry(ctx context.Context, photo []byte, ext string) (models.PhotoAnalyzeResponse, error) {
-	reply, err := s.nc.Request(messaging.SubjectPhoto, photo, requestTimeout)
+func (s biometryService) CreateFaceBiometry(ctx context.Context, photo []byte, border []int, ext string) (models.PhotoAnalyzeResponse, error) {
+	bytes, err := convertors.FromBinNumbersPairToBinary(photo, border)
+	if err != nil {
+		return models.PhotoAnalyzeResponse{}, err
+	}
+
+	reply, err := s.nc.Request(messaging.SubjectPhoto, bytes, photoRequestTimeout)
 	if err != nil {
 		return models.PhotoAnalyzeResponse{}, err
 	}
