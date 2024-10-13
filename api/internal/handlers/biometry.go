@@ -59,7 +59,7 @@ func (h biometryHandlers) CreateFaceBiometry(c *gin.Context) {
 
 	rawPhoto, err := c.FormFile("photo")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
+		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
@@ -138,7 +138,7 @@ func (h biometryHandlers) CreateVoiceBiometry(c *gin.Context) {
 	rawAudio, err := c.FormFile("audio")
 	if err != nil {
 		fmt.Println("no file with name 'audio'")
-		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
+		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
