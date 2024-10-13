@@ -19,7 +19,7 @@ const (
 	photoExt = "jpeg"
 
 	photoRequestTimeout = time.Duration(2 * time.Second)
-	voiceRequestTimeout = time.Duration(15 * time.Second)
+	voiceRequestTimeout = time.Duration(10 * time.Second)
 )
 
 type biometryService struct {

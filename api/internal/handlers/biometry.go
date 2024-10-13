@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	defaultPhotoExtension = "jpeg"
-	defaultAudioExtension = "ogg"
-	megabyte              = 1024 * 1024 // Megabyte = 1024 Kilobytes = 1024 * 1024 bytes
+	DefaultPhotoExtension = "jpeg"
+	DefaultAudioExtension = "ogg"
+	Megabyte              = 1024 * 1024 // Megabyte = 1024 Kilobytes = 1024 * 1024 bytes
 
-	contentTypeFormData = "multipart/form-data"
+	ContentTypeFormData = "multipart/form-data"
 )
 
 func NewErrorResponse(err string) models.ErrorResponse {
@@ -39,10 +39,9 @@ func NewBiometryHandlers(service service.BiometryService) BiometryHandlers {
 // @Summary      Создание лицевой биометрии
 // @Description  Создает биометрический профиль на основе фотографии
 // @Tags         FaceBiometry
-// @Accept       multipart/form-data
+// @Accept       image/jpeg
 // @Produce      json
-// @Param        photo    formData  file    true               "Фотография лица в формате JPEG"
-// @Param        numbers  formData  string  true               "Координаты точек овала, в который должно поместиться лицо"
+// @Param        file  body  string  true  "Фотография лица в формате JPEG" format(binary)
 // @Success      201    {object}  models.PhotoAnalyzeResponse  "Успешное создание профиля"
 // @Failure      400    {object}  models.ErrorResponse         "Ошибка чтения тела запроса"
 // @Failure      413                                           "Размер фотографии превышает 1МБ"
@@ -51,29 +50,29 @@ func NewBiometryHandlers(service service.BiometryService) BiometryHandlers {
 // @Failure      500    {object}  models.ErrorResponse         "Внутренняя ошибка сервера"
 // @Router       /face [post]
 func (h biometryHandlers) CreateFaceBiometry(c *gin.Context) {
-	if c.ContentType() != contentTypeFormData {
+	if c.ContentType() != ContentTypeFormData {
 		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
-			Error: fmt.Sprintf("content type must be '%s'", contentTypeFormData),
+			Error: fmt.Sprintf("content type must be '%s'", ContentTypeFormData),
 		})
 		return
 	}
 
 	rawPhoto, err := c.FormFile("photo")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
 	}
 
-	if rawPhoto.Size > megabyte {
+	if rawPhoto.Size > Megabyte {
 		c.AbortWithStatus(http.StatusRequestEntityTooLarge)
 		return
 	}
 
 	photoFile, err := rawPhoto.Open()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
@@ -82,7 +81,7 @@ func (h biometryHandlers) CreateFaceBiometry(c *gin.Context) {
 
 	photo, err := io.ReadAll(photoFile)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
@@ -92,13 +91,13 @@ func (h biometryHandlers) CreateFaceBiometry(c *gin.Context) {
 
 	border, err := convertors.FromStringToIntSlice(string(rawBorder))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
 	}
 
-	response, err := h.service.CreateFaceBiometry(c.Request.Context(), photo, border, defaultPhotoExtension)
+	response, err := h.service.CreateFaceBiometry(c.Request.Context(), photo, border, DefaultPhotoExtension)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error: err.Error(),
@@ -129,9 +128,9 @@ func (h biometryHandlers) CreateFaceBiometry(c *gin.Context) {
 // @Failure      500    {object}  models.ErrorResponse         "Внутренняя ошибка сервера"
 // @Router       /voice [post]
 func (h biometryHandlers) CreateVoiceBiometry(c *gin.Context) {
-	if c.ContentType() != contentTypeFormData {
+	if c.ContentType() != ContentTypeFormData {
 		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
-			Error: fmt.Sprintf("content type must be '%s'", contentTypeFormData),
+			Error: fmt.Sprintf("content type must be '%s'", ContentTypeFormData),
 		})
 		return
 	}
@@ -139,20 +138,20 @@ func (h biometryHandlers) CreateVoiceBiometry(c *gin.Context) {
 	rawAudio, err := c.FormFile("audio")
 	if err != nil {
 		fmt.Println("no file with name 'audio'")
-		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
 	}
 
-	if rawAudio.Size > megabyte {
+	if rawAudio.Size > Megabyte {
 		c.AbortWithStatus(http.StatusRequestEntityTooLarge)
 		return
 	}
 
 	audioFile, err := rawAudio.Open()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
@@ -161,7 +160,7 @@ func (h biometryHandlers) CreateVoiceBiometry(c *gin.Context) {
 
 	audio, err := io.ReadAll(audioFile)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
@@ -171,13 +170,13 @@ func (h biometryHandlers) CreateVoiceBiometry(c *gin.Context) {
 
 	digits, err := convertors.FromStringToIntSlice(string(rawDigits))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+		c.AbortWithStatusJSON(http.StatusUnsupportedMediaType, models.ErrorResponse{
 			Error: err.Error(),
 		})
 		return
 	}
 
-	response, err := h.service.CreateVoiceBiometry(c.Request.Context(), audio, digits, defaultAudioExtension)
+	response, err := h.service.CreateVoiceBiometry(c.Request.Context(), audio, digits, DefaultAudioExtension)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error: err.Error(),

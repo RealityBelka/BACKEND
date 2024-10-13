@@ -15,12 +15,12 @@ git clone https://github.com/RealityBelka/BACKEND.git
 Для запуска выполните следующую команду:
 
 ```sh
-docker compose up --build -d
+docker compose up --build
 ```
 
 # TODO 
 
-- [x] ML
+- [ ] ML
 - [ ] Логгирование всех операций
-- [x] Валидация содержимого тела HTTP-запроса
+- [ ] Валидация содержимого тела HTTP-запроса
 - [x] Взаимодействие API и ML (брокер сообщений)
