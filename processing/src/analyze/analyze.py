@@ -1,4 +1,3 @@
-import io
 import time
 
 import cv2
@@ -22,9 +21,9 @@ async def analyze_photo(photo, numbers: List[int]) -> dict[str, Union[bool, List
         return {"ok": flag, "message": "Лицо не обнаружено"}
 
     '''2'''
-    is_in_frame = face_analyzer.is_face_in_frame(photo, numbers)
-    if not is_in_frame:
-        return {"ok": flag, "message": "Лицо должно полностью помещаться в рамку"}
+    # is_in_frame = face_analyzer.is_face_in_frame(photo, numbers)
+    # if not is_in_frame:
+        # return {"ok": flag, "message": "Лицо должно полностью помещаться в рамку"}
 
 
     '''3'''
